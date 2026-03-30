@@ -19,19 +19,25 @@ export default function AuthPage() {
 
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setError(error.message)
-      else router.push('/dashboard')
+      if (error) {
+        setError(error.message)
+      } else {
+        await supabase.auth.getSession()
+        router.refresh()
+        router.push('/dashboard')
+      }
     } else {
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message)
       } else {
-        // Create profile
         await supabase.from('profiles').insert({
           id: data.user.id,
           email,
           full_name: fullName,
         })
+        await supabase.auth.getSession()
+        router.refresh()
         router.push('/dashboard')
       }
     }
