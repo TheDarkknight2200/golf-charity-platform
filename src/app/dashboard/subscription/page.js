@@ -24,26 +24,21 @@ export default function SubscriptionPage() {
     getUser()
   }, [])
 
-  const handleSubscribe = async (plan) => {
-    setLoading(plan)
-    const priceId = plan === 'monthly'
-      ? process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID
-      : process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID
-
-    const res = await fetch('/api/stripe/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        priceId,
-        userId: user.id,
-        email: user.email,
-      }),
-    })
-
-    const { url } = await res.json()
-    if (url) window.location.href = url
-    setLoading(null)
-  }
+    const handleSubscribe = async (plan) => {
+  setLoading(plan)
+  const res = await fetch('/api/stripe/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      plan, 
+      userId: user.id,
+      email: user.email,
+    }),
+  })
+  const { url } = await res.json()
+  if (url) window.location.href = url
+  setLoading(null)
+}
 
   const handlePortal = async () => {
     setLoading(true)

@@ -11,16 +11,15 @@ const supabase = createClient(
 
 export async function POST(req) {
   try {
-    // Debug — à supprimer après
-    console.log('STRIPE_KEY exists:', !!process.env.STRIPE_SECRET_KEY)
-    console.log('STRIPE_KEY length:', process.env.STRIPE_SECRET_KEY?.length)
-    console.log('STRIPE_KEY start:', process.env.STRIPE_SECRET_KEY?.substring(0, 10))
+    const { plan, userId, email } = await req.json()
 
-    const { priceId, userId, email } = await req.json()
-    console.log('priceId:', priceId)
-    console.log('userId:', userId)
+    const priceId = plan === 'monthly'
+      ? process.env.STRIPE_MONTHLY_PRICE_ID
+      : process.env.STRIPE_YEARLY_PRICE_ID
 
-    let customerId
+    if (!priceId) {
+      return NextResponse.json({ error: 'Price ID not found' }, { status: 400 })
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -28,11 +27,12 @@ export async function POST(req) {
       .eq('id', userId)
       .single()
 
-    customerId = profile?.stripe_customer_id
+    let customerId = profile?.stripe_customer_id
 
     if (!customerId) {
       const customer = await stripe.customers.create({ email })
       customerId = customer.id
+
       await supabase
         .from('profiles')
         .update({ stripe_customer_id: customerId })
