@@ -25,69 +25,78 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Webhook error' }, { status: 400 })
   }
 
-  const session = event.data.object
+  const data = event.data.object
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const subscription = await stripe.subscriptions.retrieve(session.subscription)
-      const userId = session.metadata.userId
-      const plan = subscription.items.data[0].price.id === process.env.STRIPE_MONTHLY_PRICE_ID ? 'monthly' : 'yearly'
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const subscription = await stripe.subscriptions.retrieve(data.subscription)
+        const userId = data.metadata.userId
+        const plan = subscription.items.data[0].price.id === process.env.STRIPE_MONTHLY_PRICE_ID ? 'monthly' : 'yearly'
 
-      await supabase
-        .from('profiles')
-        .update({
-          subscription_status: 'active',
-          subscription_plan: plan,
-          stripe_subscription_id: subscription.id,
-          subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
-        })
-        .eq('id', userId)
-      break
-    }
-
-    case 'invoice.payment_succeeded': {
-      const subscription = await stripe.subscriptions.retrieve(session.subscription)
-      const customer = await stripe.customers.retrieve(session.customer)
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('stripe_customer_id', customer.id)
-        .single()
-
-      if (profile) {
         await supabase
           .from('profiles')
           .update({
             subscription_status: 'active',
+            subscription_plan: plan,
+            stripe_subscription_id: subscription.id,
             subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
           })
-          .eq('id', profile.id)
+          .eq('id', userId)
+        break
       }
-      break
-    }
 
-    case 'customer.subscription.deleted':
-    case 'customer.subscription.updated': {
-      const customer = await stripe.customers.retrieve(session.customer)
+      case 'invoice.payment_succeeded': {
+        // data est une invoice ici
+        const subscriptionId = data.subscription
+        if (!subscriptionId) break
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('stripe_customer_id', customer.id)
-        .single()
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+        const customerId = data.customer
 
-      if (profile) {
-        await supabase
+        const { data: profile } = await supabase
           .from('profiles')
-          .update({
-            subscription_status: session.status === 'active' ? 'active' : 'inactive',
-            subscription_end_date: new Date(session.current_period_end * 1000).toISOString(),
-          })
-          .eq('id', profile.id)
+          .select('id')
+          .eq('stripe_customer_id', customerId)
+          .single()
+
+        if (profile) {
+          await supabase
+            .from('profiles')
+            .update({
+              subscription_status: 'active',
+              subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+            })
+            .eq('id', profile.id)
+        }
+        break
       }
-      break
+
+      case 'customer.subscription.deleted':
+      case 'customer.subscription.updated': {
+        const customerId = data.customer
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customerId)
+          .single()
+
+        if (profile) {
+          await supabase
+            .from('profiles')
+            .update({
+              subscription_status: data.status === 'active' ? 'active' : 'inactive',
+              subscription_end_date: new Date(data.current_period_end * 1000).toISOString(),
+            })
+            .eq('id', profile.id)
+        }
+        break
+      }
     }
+  } catch (error) {
+    console.error('Webhook handler error:', error.message)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })
