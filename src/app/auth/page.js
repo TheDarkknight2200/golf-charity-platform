@@ -24,7 +24,9 @@ export default function AuthPage() {
       })
       if (error) {
         setError(error.message)
+        console.error('Sign in error:', error)
       } else {
+        console.log('Sign in success, redirecting...')
         router.push('/dashboard')
         router.refresh()
       }
@@ -35,12 +37,14 @@ export default function AuthPage() {
       })
       if (error) {
         setError(error.message)
+        console.error('Sign up error:', error)
       } else {
         await supabase.from('profiles').insert({
           id: data.user.id,
           email,
           full_name: fullName,
         })
+        console.log('Sign up success, redirecting...')
         router.push('/dashboard')
         router.refresh()
       }
