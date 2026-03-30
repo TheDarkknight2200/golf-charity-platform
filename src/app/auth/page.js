@@ -17,6 +17,8 @@ export default function AuthPage() {
 
     if (isLogin) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      console.log('data:', data)
+      console.log('error:', error)
       if (error) {
         setError(error.message)
       } else if (data.session) {
