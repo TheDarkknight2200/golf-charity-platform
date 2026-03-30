@@ -11,29 +11,34 @@ const supabase = createClient(
 
 export async function POST(req) {
   try {
-    const { priceId, userId, email } = await req.json()
+    // Debug — à supprimer après
+    console.log('STRIPE_KEY exists:', !!process.env.STRIPE_SECRET_KEY)
+    console.log('STRIPE_KEY length:', process.env.STRIPE_SECRET_KEY?.length)
+    console.log('STRIPE_KEY start:', process.env.STRIPE_SECRET_KEY?.substring(0, 10))
 
-    // Vérifie si le customer Stripe existe déjà
+    const { priceId, userId, email } = await req.json()
+    console.log('priceId:', priceId)
+    console.log('userId:', userId)
+
+    let customerId
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id')
       .eq('id', userId)
       .single()
 
-    let customerId = profile?.stripe_customer_id
+    customerId = profile?.stripe_customer_id
 
-    // Sinon crée un nouveau customer
     if (!customerId) {
       const customer = await stripe.customers.create({ email })
       customerId = customer.id
-
       await supabase
         .from('profiles')
         .update({ stripe_customer_id: customerId })
         .eq('id', userId)
     }
 
-    // Crée la session de checkout
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -46,7 +51,7 @@ export async function POST(req) {
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    console.error('Checkout error:', error)
+    console.error('Checkout error:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
