@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 export default function SubscriptionPage() {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function SubscriptionPage() {
   }, [])
 
   const handleSubscribe = async (plan) => {
-    setLoading(true)
+    setLoading(plan)
     const priceId = plan === 'monthly'
       ? process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID
       : process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID
@@ -42,7 +42,7 @@ export default function SubscriptionPage() {
 
     const { url } = await res.json()
     if (url) window.location.href = url
-    setLoading(false)
+    setLoading(null)
   }
 
   const handlePortal = async () => {
@@ -108,9 +108,9 @@ export default function SubscriptionPage() {
               </ul>
               <button
                 onClick={() => handleSubscribe('monthly')}
-                disabled={loading}
+                disabled={loading !== null}
                 className="w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg font-semibold transition disabled:opacity-50">
-                {loading ? 'Loading...' : 'Subscribe Monthly'}
+                {loading === 'monthly' ? 'Loading...' : 'Subscribe Monthly'}
               </button>
             </div>
 
@@ -130,9 +130,9 @@ export default function SubscriptionPage() {
               </ul>
               <button
                 onClick={() => handleSubscribe('yearly')}
-                disabled={loading}
+                disabled={loading !== null}
                 className="w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg font-semibold transition disabled:opacity-50">
-                {loading ? 'Loading...' : 'Subscribe Yearly'}
+                {loading === 'yearly' ? 'Loading...' : 'Subscribe Yearly'}
               </button>
             </div>
           </div>
