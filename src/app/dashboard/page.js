@@ -11,12 +11,8 @@ export default function Dashboard() {
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/auth')
-        return
-      }
+      if (!session) { router.push('/auth'); return }
       setUser(session.user)
-
       const { data } = await supabase
         .from('profiles')
         .select('*')
@@ -40,30 +36,30 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      
+
       {/* Navbar */}
       <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-  <h1 className="text-xl font-bold text-green-500">⛳ GolfCharity</h1>
-  <div className="flex items-center gap-4">
-    <span className="text-gray-400 text-sm">{user.email}</span>
-    {profile?.is_admin && (
-      <button
-        onClick={() => router.push('/admin')}
-        className="text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 px-3 py-1 rounded-lg transition">
-        Admin
-      </button>
-    )}
-    <button
-      onClick={handleLogout}
-      className="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
-      Logout
-    </button>
-  </div>
-</nav>
+        <h1 className="text-xl font-bold text-green-500">⛳ GolfCharity</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-400 text-sm">{user.email}</span>
+          {profile?.is_admin && (
+            <button
+              onClick={() => router.push('/admin')}
+              className="text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 px-3 py-1 rounded-lg transition">
+              Admin
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            className="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
+            Logout
+          </button>
+        </div>
+      </nav>
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        
+
         {/* Welcome */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold">Welcome back, {profile?.full_name || 'Golfer'} 👋</h2>
@@ -71,19 +67,20 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-  <p className="text-gray-400 text-sm">Subscription</p>
-  <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
-    {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
-  </p>
-  {profile?.subscription_status !== 'active' && (
-    <button
-      onClick={() => router.push('/dashboard/subscription')}
-      className="mt-3 text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg transition">
-      Subscribe now
-    </button>
-  )}
-</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <p className="text-gray-400 text-sm">Subscription</p>
+            <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
+              {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
+            </p>
+            {profile?.subscription_status !== 'active' && (
+              <button
+                onClick={() => router.push('/dashboard/subscription')}
+                className="mt-3 text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg transition">
+                Subscribe now
+              </button>
+            )}
+          </div>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <p className="text-gray-400 text-sm">My Charity</p>
             <p className="text-2xl font-bold mt-1">{profile?.charity_id ? 'Selected' : 'Not selected'}</p>
@@ -95,36 +92,35 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-    <h3 className="font-semibold mb-2">🏌️ My Scores</h3>
-    <p className="text-gray-400 text-sm mb-4">Enter and track your last 5 golf scores.</p>
-    <button
-      onClick={() => router.push('/dashboard/scores')}
-      className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-sm font-medium transition">
-      Add Score
-    </button>
-  </div>
-  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-    <h3 className="font-semibold mb-2">❤️ My Charity</h3>
-    <p className="text-gray-400 text-sm mb-4">Choose your charity and set your contribution.</p>
-    <button
-      onClick={() => router.push('/dashboard/charity')}
-      className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-      Choose Charity
-    </button>
-  </div>
-  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-    <h3 className="font-semibold mb-2">🎁 Monthly Draw</h3>
-    <p className="text-gray-400 text-sm mb-4">View upcoming draws and your participation status.</p>
-   <button
-  onClick={() => router.push('/dashboard/draws')}
-  className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-  View Draw
-</button>
-   
-  </div>
-</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-2">🏌️ My Scores</h3>
+            <p className="text-gray-400 text-sm mb-4">Enter and track your last 5 golf scores.</p>
+            <button
+              onClick={() => router.push('/dashboard/scores')}
+              className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-sm font-medium transition">
+              Add Score
+            </button>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-2">❤️ My Charity</h3>
+            <p className="text-gray-400 text-sm mb-4">Choose your charity and set your contribution.</p>
+            <button
+              onClick={() => router.push('/dashboard/charity')}
+              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+              Choose Charity
+            </button>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-2">🎁 Monthly Draw</h3>
+            <p className="text-gray-400 text-sm mb-4">View upcoming draws and your participation status.</p>
+            <button
+              onClick={() => router.push('/dashboard/draws')}
+              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+              View Draw
+            </button>
+          </div>
+        </div>
 
       </div>
     </div>
