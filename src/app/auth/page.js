@@ -16,30 +16,27 @@ export default function AuthPage() {
     setError('')
 
     if (isLogin) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      console.log('data:', data)
-      console.log('error:', error)
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         setError(error.message)
-      } else if (data.session) {
+        setLoading(false)
+      } else {
         window.location.replace('/dashboard')
       }
     } else {
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message)
+        setLoading(false)
       } else {
         await supabase.from('profiles').insert({
           id: data.user.id,
           email,
           full_name: fullName,
         })
-        if (data.session) {
-          window.location.replace('/dashboard')
-        }
+        window.location.replace('/dashboard')
       }
     }
-    setLoading(false)
   }
 
   return (
