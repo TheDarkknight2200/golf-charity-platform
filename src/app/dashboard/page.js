@@ -71,13 +71,19 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm">Subscription</p>
-            <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
-              {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
-            </p>
-          </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+  <p className="text-gray-400 text-sm">Subscription</p>
+  <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
+    {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
+  </p>
+  {profile?.subscription_status !== 'active' && (
+    <button
+      onClick={() => router.push('/dashboard/subscription')}
+      className="mt-3 text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg transition">
+      Subscribe now
+    </button>
+  )}
+</div>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <p className="text-gray-400 text-sm">My Charity</p>
             <p className="text-2xl font-bold mt-1">{profile?.charity_id ? 'Selected' : 'Not selected'}</p>
