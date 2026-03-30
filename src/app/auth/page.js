@@ -19,8 +19,8 @@ export default function AuthPage() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth event:', event, session?.user?.email)
       if (event === 'SIGNED_IN' && session) {
-        console.log('Redirecting to dashboard via listener...')
-        router.push('/dashboard')
+        console.log('Redirecting to dashboard via window.location...')
+        window.location.href = '/dashboard'
       }
     })
 
