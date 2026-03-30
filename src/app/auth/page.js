@@ -1,7 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -9,28 +8,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
-  const [checking, setChecking] = useState(true) // ← nouveau
   const [error, setError] = useState('')
-  const router = useRouter()
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        window.location.replace('/dashboard')
-      } else {
-        setChecking(false) // ← affiche la page seulement si pas de session
-      }
-    }
-    checkSession()
-  }, [])
-
-  // ← Ne rien afficher pendant la vérification
-  if (checking) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-white">Loading...</p>
-    </div>
-  )
 
   const handleAuth = async (e) => {
     e.preventDefault()
@@ -127,7 +105,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 text-white py-3 rounded-lg"
+              className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-50"
             >
               {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
             </button>
