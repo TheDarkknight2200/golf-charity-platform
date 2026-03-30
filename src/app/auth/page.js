@@ -17,7 +17,7 @@ export default function AuthPage() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        router.push('/dashboard')
+        window.location.replace('/dashboard')
       }
     }
     checkSession()
@@ -39,7 +39,7 @@ export default function AuthPage() {
       } else {
         // ✅ Direct redirect (NO listener needed)
         if (data.session) {
-          router.push('/dashboard')
+          window.location.replace('/dashboard')
         }
       }
 
@@ -60,7 +60,7 @@ export default function AuthPage() {
         })
 
         if (data.session) {
-          router.push('/dashboard')
+          window.location.replace('/dashboard')
         }
       }
     }
