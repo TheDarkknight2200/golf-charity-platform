@@ -9,19 +9,28 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true) // ← nouveau
   const [error, setError] = useState('')
   const router = useRouter()
 
-  // ✅ Check session on load (VERY IMPORTANT)
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         window.location.replace('/dashboard')
+      } else {
+        setChecking(false) // ← affiche la page seulement si pas de session
       }
     }
     checkSession()
-  }, [router])
+  }, [])
+
+  // ← Ne rien afficher pendant la vérification
+  if (checking) return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <p className="text-white">Loading...</p>
+    </div>
+  )
 
   const handleAuth = async (e) => {
     e.preventDefault()
@@ -29,42 +38,27 @@ export default function AuthPage() {
     setError('')
 
     if (isLogin) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      })
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         setError(error.message)
-      } else {
-        // ✅ Direct redirect (NO listener needed)
-        if (data.session) {
-          window.location.replace('/dashboard')
-        }
+      } else if (data.session) {
+        window.location.replace('/dashboard')
       }
-
     } else {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password
-      })
-
+      const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message)
       } else {
-        // Insert profile
         await supabase.from('profiles').insert({
           id: data.user.id,
           email,
           full_name: fullName,
         })
-
         if (data.session) {
           window.location.replace('/dashboard')
         }
       }
     }
-
     setLoading(false)
   }
 
