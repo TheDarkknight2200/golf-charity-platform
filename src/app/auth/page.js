@@ -18,23 +18,31 @@ export default function AuthPage() {
     setError('')
 
     if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-    setError(error.message)
-    } else {
-    window.location.href = '/dashboard'  // ← remplace router.push
-    }
-    } else {
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      })
       if (error) {
         setError(error.message)
       } else {
-            await supabase.from('profiles').insert({
-    id: data.user.id,
-    email,
-    full_name: fullName,
-    })
-    window.location.href = '/dashboard'  // ← remplace router.push
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } else {
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password 
+      })
+      if (error) {
+        setError(error.message)
+      } else {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          email,
+          full_name: fullName,
+        })
+        router.push('/dashboard')
+        router.refresh()
       }
     }
     setLoading(false)
