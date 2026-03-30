@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -11,6 +11,23 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+
+  // Robust redirect on auth state change
+  useEffect(() => {
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event, session?.user?.email)
+      if (event === 'SIGNED_IN' && session) {
+        console.log('Redirecting to dashboard via listener...')
+        router.push('/dashboard')
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router])
 
   const handleAuth = async (e) => {
     e.preventDefault()
@@ -26,9 +43,8 @@ export default function AuthPage() {
         setError(error.message)
         console.error('Sign in error:', error)
       } else {
-        console.log('Sign in success, redirecting...')
-        router.push('/dashboard')
-        router.refresh()
+        console.log('Sign in API success - listener will redirect')
+        // Listener handles redirect
       }
     } else {
       const { data, error } = await supabase.auth.signUp({ 
@@ -44,9 +60,8 @@ export default function AuthPage() {
           email,
           full_name: fullName,
         })
-        console.log('Sign up success, redirecting...')
-        router.push('/dashboard')
-        router.refresh()
+        console.log('Sign up API success - listener will redirect')
+        // Listener handles redirect
       }
     }
     setLoading(false)
