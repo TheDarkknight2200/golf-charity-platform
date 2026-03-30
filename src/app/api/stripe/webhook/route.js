@@ -40,7 +40,9 @@ export async function POST(req) {
             subscription_status: 'active',
             subscription_plan: plan,
             stripe_subscription_id: subscription.id,
-            subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+            subscription_end_date: subscription.current_period_end 
+  ? new Date(subscription.current_period_end * 1000).toISOString() 
+  : null,
           })
           .eq('id', userId)
         break
@@ -65,7 +67,9 @@ export async function POST(req) {
             .from('profiles')
             .update({
               subscription_status: 'active',
-              subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+              subscription_end_date: subscription.current_period_end 
+  ? new Date(subscription.current_period_end * 1000).toISOString() 
+  : null,
             })
             .eq('id', profile.id)
         }
@@ -87,7 +91,9 @@ export async function POST(req) {
             .from('profiles')
             .update({
               subscription_status: data.status === 'active' ? 'active' : 'inactive',
-              subscription_end_date: new Date(data.current_period_end * 1000).toISOString(),
+              subscription_end_date: subscription.current_period_end 
+  ? new Date(subscription.current_period_end * 1000).toISOString() 
+  : null,
             })
             .eq('id', profile.id)
         }
