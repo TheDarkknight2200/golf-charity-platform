@@ -84,7 +84,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
           <div className="animate-fade-in-up delay-100 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
             <p className="text-gray-400 text-sm">Subscription</p>
             <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>

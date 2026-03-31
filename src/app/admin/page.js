@@ -229,7 +229,7 @@ const handleViewProof = async (proofUrl) => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-800">
+        <div className="flex gap-2 mb-6 border-b border-gray-800 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab}
@@ -580,7 +580,7 @@ const handleViewProof = async (proofUrl) => {
 
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
               <h4 className="text-green-400 font-semibold mb-4">💰 Finance</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-800 rounded-lg p-4 text-center">
                   <p className="text-3xl font-bold text-green-400">${(analytics.totalPrizePool || 0).toFixed(2)}</p>
                   <p className="text-gray-400 text-sm mt-1">Total Prize Pool</p>
@@ -598,7 +598,7 @@ const handleViewProof = async (proofUrl) => {
 
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
               <h4 className="text-green-400 font-semibold mb-4">🎁 Draws</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="bg-gray-800 rounded-lg p-4 text-center">
                   <p className="text-3xl font-bold text-white">{analytics.totalDraws || 0}</p>
                   <p className="text-gray-400 text-sm mt-1">Total Draws</p>
