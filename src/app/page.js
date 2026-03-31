@@ -6,16 +6,19 @@ export default function HomePage() {
 
       {/* Navbar */}
       <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-green-500">⛳ GolfCharity</h1>
-        <div className="flex gap-3">
-          <Link href="/auth" className="text-sm text-gray-400 hover:text-white transition px-4 py-2">
-            Sign In
-          </Link>
-          <Link href="/auth" className="text-sm bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition font-medium">
-            Get Started
-          </Link>
-        </div>
-      </nav>
+  <h1 className="text-xl font-bold text-green-500">⛳ GolfCharity</h1>
+  <div className="flex gap-3 items-center">
+    <Link href="/charities" className="text-sm text-gray-400 hover:text-white transition px-4 py-2">
+      Charities
+    </Link>
+    <Link href="/auth" className="text-sm text-gray-400 hover:text-white transition px-4 py-2">
+      Sign In
+    </Link>
+    <Link href="/auth" className="text-sm bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition font-medium">
+      Get Started
+    </Link>
+  </div>
+</nav>
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 py-24 text-center">
