@@ -21,26 +21,26 @@ export default function HomePage() {
 </nav>
 
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 py-24 text-center">
-        <span className="text-green-500 text-sm font-medium bg-green-900/20 border border-green-800 px-4 py-1.5 rounded-full">
-          Play Golf. Win Prizes. Change Lives.
-        </span>
-        <h1 className="text-5xl md:text-6xl font-bold mt-6 mb-6 leading-tight">
-          The Golf Platform That<br />
-          <span className="text-green-500">Gives Back</span>
-        </h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
-          Track your Stableford scores, enter monthly prize draws and support the charity of your choice — all in one place.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link href="/auth" className="bg-green-600 hover:bg-green-500 text-white font-semibold px-8 py-4 rounded-xl transition text-lg">
-            Start Playing →
-          </Link>
-          <a href="#how-it-works" className="bg-gray-800 hover:bg-gray-700 text-white font-semibold px-8 py-4 rounded-xl transition text-lg">
-            How It Works
-          </a>
-        </div>
-      </section>
+<section className="max-w-5xl mx-auto px-6 py-24 text-center page-enter">
+  <span className="animate-fade-in-up delay-100 inline-block text-green-500 text-sm font-medium bg-green-900/20 border border-green-800 px-4 py-1.5 rounded-full">
+    Play Golf. Win Prizes. Change Lives.
+  </span>
+  <h1 className="animate-fade-in-up delay-200 text-5xl md:text-6xl font-bold mt-6 mb-6 leading-tight">
+    The Golf Platform That<br />
+    <span className="text-green-500">Gives Back</span>
+  </h1>
+  <p className="animate-fade-in-up delay-300 text-gray-400 text-lg max-w-2xl mx-auto mb-10">
+    Track your Stableford scores, enter monthly prize draws and support the charity of your choice — all in one place.
+  </p>
+  <div className="animate-fade-in-up delay-400 flex gap-4 justify-center">
+    <Link href="/auth" className="btn-press bg-green-600 hover:bg-green-500 text-white font-semibold px-8 py-4 rounded-xl transition text-lg">
+      Start Playing →
+    </Link>
+    <a href="#how-it-works" className="btn-press bg-gray-800 hover:bg-gray-700 text-white font-semibold px-8 py-4 rounded-xl transition text-lg">
+      How It Works
+    </a>
+  </div>
+</section>
 
       {/* Stats */}
       <section className="border-y border-gray-800 py-12">
