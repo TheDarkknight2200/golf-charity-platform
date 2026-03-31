@@ -11,6 +11,16 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('users')
   const [loading, setLoading] = useState(false)
   const [newDraw, setNewDraw] = useState({ draw_date: '', jackpot_amount: '', pool_4match: '', pool_3match: '' })
+  const [analytics, setAnalytics] = useState({
+    totalUsers: 0,
+    activeSubscribers: 0,
+    totalPrizePool: 0,
+    totalDonations: 0,
+    totalDraws: 0,
+    publishedDraws: 0,
+    pendingWinners: 0,
+    totalCharityContributions: 0,
+  })
   const router = useRouter()
 
   useEffect(() => {
@@ -45,9 +55,33 @@ export default function AdminPage() {
       .from('winners')
       .select('*, profiles(full_name, email), draws(draw_date)')
     setWinners(winnersData || [])
-  }
 
-  const handleCreateDraw = async (e) => {
+
+    const { data: allProfiles } = await supabase.from('profiles').select('subscription_status, charity_percentage, subscription_plan')
+  const { data: allDraws } = await supabase.from('draws').select('status, jackpot_amount, pool_4match, pool_3match')
+  const { data: allWinners } = await supabase.from('winners').select('payment_status, prize_amount')
+  const { data: allDonations } = await supabase.from('donations').select('amount, status')
+
+  const activeSubscribers = allProfiles?.filter(p => p.subscription_status === 'active').length || 0
+  const monthlyRevenue = activeSubscribers * 9.99
+  const totalPrizePool = allDraws?.reduce((sum, d) => sum + (d.jackpot_amount || 0) + (d.pool_4match || 0) + (d.pool_3match || 0), 0) || 0
+  const totalDonations = allDonations?.filter(d => d.status === 'completed').reduce((sum, d) => sum + (d.amount / 100), 0) || 0
+  const totalCharityContributions = monthlyRevenue * 0.1
+  const pendingWinners = allWinners?.filter(w => w.payment_status !== 'paid').length || 0
+
+  setAnalytics({
+    totalUsers: allProfiles?.length || 0,
+    activeSubscribers,
+    totalPrizePool,
+    totalDonations,
+    totalDraws: allDraws?.length || 0,
+    publishedDraws: allDraws?.filter(d => d.status === 'published').length || 0,
+    pendingWinners,
+    totalCharityContributions,
+  })
+}
+
+const handleCreateDraw = async (e) => {
     e.preventDefault()
     setLoading(true)
 
@@ -116,7 +150,7 @@ const handleViewProof = async (proofUrl) => {
   fetchAll()
 }
 
-  const tabs = ['users', 'draws', 'charities', 'winners']
+  const tabs = ['users', 'draws', 'charities', 'winners', 'reports']
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -477,6 +511,65 @@ const handleViewProof = async (proofUrl) => {
                       </button>
                     )}
                   </div>
+                  {/* REPORTS TAB */}
+{activeTab === 'reports' && (
+  <div className="space-y-6">
+    <h3 className="font-semibold text-lg">📊 Platform Analytics</h3>
+
+    {/* Users */}
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <h4 className="text-green-400 font-semibold mb-4">👥 Users</h4>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{analytics.totalUsers}</p>
+          <p className="text-gray-400 text-sm mt-1">Total Users</p>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-green-400">{analytics.activeSubscribers}</p>
+          <p className="text-gray-400 text-sm mt-1">Active Subscribers</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Finance */}
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <h4 className="text-green-400 font-semibold mb-4">💰 Finance</h4>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-green-400">${analytics.totalPrizePool.toFixed(2)}</p>
+          <p className="text-gray-400 text-sm mt-1">Total Prize Pool</p>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-blue-400">${analytics.totalCharityContributions.toFixed(2)}</p>
+          <p className="text-gray-400 text-sm mt-1">Charity Contributions</p>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-purple-400">${analytics.totalDonations.toFixed(2)}</p>
+          <p className="text-gray-400 text-sm mt-1">Independent Donations</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Draws */}
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <h4 className="text-green-400 font-semibold mb-4">🎁 Draws</h4>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-white">{analytics.totalDraws}</p>
+          <p className="text-gray-400 text-sm mt-1">Total Draws</p>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-green-400">{analytics.publishedDraws}</p>
+          <p className="text-gray-400 text-sm mt-1">Published Draws</p>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-4 text-center">
+          <p className="text-3xl font-bold text-yellow-400">{analytics.pendingWinners}</p>
+          <p className="text-gray-400 text-sm mt-1">Pending Payouts</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
                 </div>
               ))
             )}
