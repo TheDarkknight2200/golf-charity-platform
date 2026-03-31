@@ -30,23 +30,35 @@ export async function POST(req) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const subscription = await stripe.subscriptions.retrieve(data.subscription)
-        const userId = data.metadata.userId
-        const plan = subscription.items.data[0].price.id === process.env.STRIPE_MONTHLY_PRICE_ID ? 'monthly' : 'yearly'
+  const subscription = await stripe.subscriptions.retrieve(data.subscription)
+  const userId = data.metadata.userId
+  const plan = subscription.items.data[0].price.id === process.env.STRIPE_MONTHLY_PRICE_ID ? 'monthly' : 'yearly'
 
-        await supabase
-          .from('profiles')
-          .update({
-            subscription_status: 'active',
-            subscription_plan: plan,
-            stripe_subscription_id: subscription.id,
-            subscription_end_date: subscription.current_period_end 
-  ? new Date(subscription.current_period_end * 1000).toISOString() 
-  : null,
-          })
-          .eq('id', userId)
-        break
-      }
+  await supabase
+    .from('profiles')
+    .update({
+      subscription_status: 'active',
+      subscription_plan: plan,
+      stripe_subscription_id: subscription.id,
+      subscription_end_date: subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
+        : null,
+    })
+    .eq('id', userId)
+
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, full_name, subscription_end_date')
+    .eq('id', userId)
+    .single()
+
+  if (profile) {
+    const { sendSubscriptionEmail } = await import('@/lib/email')
+    await sendSubscriptionEmail(profile.email, profile.full_name, plan, profile.subscription_end_date)
+  }
+  break
+}
 
       case 'invoice.payment_succeeded': {
         // data est une invoice ici

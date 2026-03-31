@@ -24,19 +24,25 @@ export default function AuthPage() {
         window.location.replace('/dashboard')
       }
     } else {
-      const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) {
-        setError(error.message)
-        setLoading(false)
-      } else {
-        await supabase.from('profiles').insert({
-          id: data.user.id,
-          email,
-          full_name: fullName,
-        })
-        window.location.replace('/dashboard')
-      }
-    }
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if (error) {
+    setError(error.message)
+    setLoading(false)
+  } else {
+    await supabase.from('profiles').insert({
+      id: data.user.id,
+      email,
+      full_name: fullName,
+    })
+    
+    await fetch('/api/email/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, fullName }),
+    })
+    window.location.replace('/dashboard')
+  }
+}
   }
 
   return (

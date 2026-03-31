@@ -104,9 +104,17 @@ const handleViewProof = async (proofUrl) => {
 }
 
   const handleVerification = async (winnerId, status) => {
-    await supabase.from('winners').update({ verification_status: status }).eq('id', winnerId)
-    fetchAll()
-  }
+  await supabase.from('winners').update({ verification_status: status }).eq('id', winnerId)
+  
+  
+  await fetch('/api/email/winner-verified', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ winnerId, status }),
+  })
+  
+  fetchAll()
+}
 
   const tabs = ['users', 'draws', 'charities', 'winners']
 
