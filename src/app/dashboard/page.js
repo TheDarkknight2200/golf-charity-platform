@@ -26,37 +26,17 @@ export default function Dashboard() {
         .single()
       setProfile(data)
 
-      // Participation summary
-      const { data: allDraws } = await supabase
-        .from('draws')
-        .select('*')
-
-      const { data: myScores } = await supabase
-        .from('scores')
-        .select('score')
-        .eq('user_id', session.user.id)
-
-      const { data: myWinnings } = await supabase
-        .from('winners')
-        .select('prize_amount')
-        .eq('user_id', session.user.id)
+      const { data: allDraws } = await supabase.from('draws').select('*')
+      const { data: myScores } = await supabase.from('scores').select('score').eq('user_id', session.user.id)
+      const { data: myWinnings } = await supabase.from('winners').select('prize_amount').eq('user_id', session.user.id)
 
       const publishedDraws = allDraws?.filter(d => d.status === 'published') || []
       const upcomingDraws = allDraws?.filter(d => d.status === 'pending') || []
       const userScores = myScores?.map(s => s.score) || []
-
-      // Un draw est "entered" si l'utilisateur avait des scores qui matchent
-      const drawsEntered = publishedDraws.filter(draw =>
-        draw.winning_numbers?.some(n => userScores.includes(n))
-      ).length
-
+      const drawsEntered = publishedDraws.filter(draw => draw.winning_numbers?.some(n => userScores.includes(n))).length
       const totalWinnings = myWinnings?.reduce((sum, w) => sum + (w.prize_amount || 0), 0) || 0
 
-      setParticipation({
-        drawsEntered,
-        upcomingDraws: upcomingDraws.length,
-        totalWinnings,
-      })
+      setParticipation({ drawsEntered, upcomingDraws: upcomingDraws.length, totalWinnings })
     }
     getUser()
   }, [])
@@ -76,37 +56,36 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-950 text-white">
 
       {/* Navbar */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between animate-fade-in">
         <h1 className="text-xl font-bold text-green-500">⛳ GolfCharity</h1>
         <div className="flex items-center gap-4">
           <span className="text-gray-400 text-sm">{user.email}</span>
           {profile?.is_admin && (
             <button
               onClick={() => router.push('/admin')}
-              className="text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 px-3 py-1 rounded-lg transition">
+              className="btn-press text-xs bg-red-900/40 text-red-400 hover:bg-red-900/60 px-3 py-1 rounded-lg transition">
               Admin
             </button>
           )}
           <button
             onClick={handleLogout}
-            className="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
+            className="btn-press text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
             Logout
           </button>
         </div>
       </nav>
 
-      {/* Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
 
         {/* Welcome */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in-up">
           <h2 className="text-2xl font-bold">Welcome back, {profile?.full_name || 'Golfer'} 👋</h2>
           <p className="text-gray-400 mt-1">Track your scores, support your charity and win prizes.</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="animate-fade-in-up delay-100 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
             <p className="text-gray-400 text-sm">Subscription</p>
             <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
               {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
@@ -114,23 +93,23 @@ export default function Dashboard() {
             {profile?.subscription_status !== 'active' && (
               <button
                 onClick={() => router.push('/dashboard/subscription')}
-                className="mt-3 text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg transition">
+                className="btn-press mt-3 text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg transition">
                 Subscribe now
               </button>
             )}
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="animate-fade-in-up delay-200 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
             <p className="text-gray-400 text-sm">My Charity</p>
             <p className="text-2xl font-bold mt-1">{profile?.charity_id ? 'Selected' : 'Not selected'}</p>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="animate-fade-in-up delay-300 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
             <p className="text-gray-400 text-sm">Charity Contribution</p>
             <p className="text-2xl font-bold mt-1 text-green-500">{profile?.charity_percentage || 10}%</p>
           </div>
         </div>
 
         {/* Participation Summary */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
+        <div className="animate-fade-in-up delay-400 bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
           <h3 className="font-semibold mb-4">📊 Participation Summary</h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
@@ -150,51 +129,23 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-2">🏌️ My Scores</h3>
-            <p className="text-gray-400 text-sm mb-4">Enter and track your last 5 golf scores.</p>
-            <button
-              onClick={() => router.push('/dashboard/scores')}
-              className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-sm font-medium transition">
-              Add Score
-            </button>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-2">❤️ My Charity</h3>
-            <p className="text-gray-400 text-sm mb-4">Choose your charity and set your contribution.</p>
-            <button
-              onClick={() => router.push('/dashboard/charity')}
-              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-              Choose Charity
-            </button>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-2">🎁 Monthly Draw</h3>
-            <p className="text-gray-400 text-sm mb-4">View upcoming draws and your participation status.</p>
-            <button
-              onClick={() => router.push('/dashboard/draws')}
-              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-              View Draw
-            </button>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-2">❤️ Make a Donation</h3>
-            <p className="text-gray-400 text-sm mb-4">Donate directly to a charity, independent of your subscription.</p>
-            <button
-              onClick={() => router.push('/dashboard/donate')}
-              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-              Donate Now
-            </button>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-2">🏆 My Winnings</h3>
-            <p className="text-gray-400 text-sm mb-4">View your prizes and upload verification proof.</p>
-            <button
-              onClick={() => router.push('/dashboard/winners')}
-              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-              View Winnings
-            </button>
-          </div>
+          {[
+            { icon: '🏌️', title: 'My Scores', desc: 'Enter and track your last 5 golf scores.', btn: 'Add Score', path: '/dashboard/scores', color: 'bg-green-600 hover:bg-green-500' },
+            { icon: '❤️', title: 'My Charity', desc: 'Choose your charity and set your contribution.', btn: 'Choose Charity', path: '/dashboard/charity', color: 'bg-gray-700 hover:bg-gray-600' },
+            { icon: '🎁', title: 'Monthly Draw', desc: 'View upcoming draws and your participation status.', btn: 'View Draw', path: '/dashboard/draws', color: 'bg-gray-700 hover:bg-gray-600' },
+            { icon: '❤️', title: 'Make a Donation', desc: 'Donate directly to a charity, independent of your subscription.', btn: 'Donate Now', path: '/dashboard/donate', color: 'bg-gray-700 hover:bg-gray-600' },
+            { icon: '🏆', title: 'My Winnings', desc: 'View your prizes and upload verification proof.', btn: 'View Winnings', path: '/dashboard/winners', color: 'bg-gray-700 hover:bg-gray-600' },
+          ].map((item, index) => (
+            <div key={item.title} className={`animate-fade-in-up delay-${(index + 1) * 100} card-hover bg-gray-900 border border-gray-800 rounded-xl p-6`}>
+              <h3 className="font-semibold mb-2">{item.icon} {item.title}</h3>
+              <p className="text-gray-400 text-sm mb-4">{item.desc}</p>
+              <button
+                onClick={() => router.push(item.path)}
+                className={`btn-press ${item.color} px-4 py-2 rounded-lg text-sm font-medium transition`}>
+                {item.btn}
+              </button>
+            </div>
+          ))}
         </div>
 
       </div>
