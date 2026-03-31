@@ -87,9 +87,12 @@ export default function AdminPage() {
   }
 
   const handleUpdatePayment = async (winnerId) => {
-    await supabase.from('winners').update({ payment_status: 'paid' }).eq('id', winnerId)
-    fetchAll()
-  }
+  await supabase.from('winners').update({ 
+    payment_status: 'paid',
+    verification_status: 'approved'
+  }).eq('id', winnerId)
+  fetchAll()
+}
 
   const handleVerification = async (winnerId, status) => {
     await supabase.from('winners').update({ verification_status: status }).eq('id', winnerId)
