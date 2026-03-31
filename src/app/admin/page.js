@@ -79,6 +79,14 @@ export default function AdminPage() {
     pendingWinners,
     totalCharityContributions,
   })
+
+  console.log('analytics:', {
+  totalUsers: allProfiles?.length,
+  activeSubscribers,
+  totalPrizePool,
+  allDonations,
+  allDraws,
+})
 }
 
 const handleCreateDraw = async (e) => {
