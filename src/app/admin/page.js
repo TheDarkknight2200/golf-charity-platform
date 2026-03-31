@@ -273,21 +273,140 @@ const handleViewProof = async (proofUrl) => {
         )}
 
         {/* CHARITIES TAB */}
-        {activeTab === 'charities' && (
-          <div className="space-y-3">
-            {charities.map(charity => (
-              <div key={charity.id} className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{charity.name}</p>
-                  <p className="text-gray-400 text-sm">{charity.description}</p>
-                </div>
+{activeTab === 'charities' && (
+  <div>
+    {/* Add Charity Form */}
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
+      <h3 className="font-semibold mb-4">Add New Charity</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Name</label>
+          <input
+            type="text"
+            placeholder="Charity name"
+            id="charity-name"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Category</label>
+          <select
+            id="charity-category"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500">
+            <option value="general">General</option>
+            <option value="health">Health</option>
+            <option value="education">Education</option>
+            <option value="environment">Environment</option>
+            <option value="children">Children</option>
+          </select>
+        </div>
+        <div className="md:col-span-2">
+          <label className="text-xs text-gray-400 mb-1 block">Description</label>
+          <textarea
+            id="charity-description"
+            placeholder="Charity description"
+            rows={2}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Image URL</label>
+          <input
+            type="text"
+            placeholder="https://..."
+            id="charity-image"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-gray-400 mb-1 block">Website</label>
+          <input
+            type="text"
+            placeholder="https://..."
+            id="charity-website"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <input type="checkbox" id="charity-featured" className="accent-green-500" />
+          <label htmlFor="charity-featured" className="text-sm text-gray-400">Featured charity</label>
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={async () => {
+              const name = document.getElementById('charity-name').value
+              const description = document.getElementById('charity-description').value
+              const category = document.getElementById('charity-category').value
+              const image_url = document.getElementById('charity-image').value
+              const website = document.getElementById('charity-website').value
+              const featured = document.getElementById('charity-featured').checked
+              if (!name) return
+              await supabase.from('charities').insert({ name, description, category, image_url, website, featured })
+              fetchAll()
+              document.getElementById('charity-name').value = ''
+              document.getElementById('charity-description').value = ''
+              document.getElementById('charity-image').value = ''
+              document.getElementById('charity-website').value = ''
+              document.getElementById('charity-featured').checked = false
+            }}
+            className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded-lg text-sm font-medium transition">
+            Add Charity
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Charities List */}
+    <div className="space-y-3">
+      {charities.map(charity => (
+        <div key={charity.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-medium">{charity.name}</p>
                 {charity.featured && (
                   <span className="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full">Featured</span>
                 )}
+                <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full capitalize">{charity.category}</span>
               </div>
-            ))}
+              <p className="text-gray-400 text-sm">{charity.description}</p>
+              {charity.website && (
+                <a href={charity.website} target="_blank" rel="noopener noreferrer"
+                  className="text-green-400 text-xs hover:underline mt-1 inline-block">
+                  {charity.website}
+                </a>
+              )}
+            </div>
+            <div className="flex gap-2 ml-4">
+              <button
+                onClick={async () => {
+                  await supabase.from('charities').update({ featured: !charity.featured }).eq('id', charity.id)
+                  fetchAll()
+                }}
+                className={`text-xs px-3 py-1 rounded-lg transition ${
+                  charity.featured
+                    ? 'bg-green-900/40 text-green-400 hover:bg-green-900/60'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}>
+                {charity.featured ? '★ Unfeature' : '☆ Feature'}
+              </button>
+              <button
+                onClick={async () => {
+                  if (confirm('Delete this charity?')) {
+                    await supabase.from('charities').delete().eq('id', charity.id)
+                    fetchAll()
+                  }
+                }}
+                className="bg-red-900/40 hover:bg-red-900/60 text-red-400 px-3 py-1 rounded-lg text-xs transition">
+                Delete
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* WINNERS TAB */}
         {activeTab === 'winners' && (
