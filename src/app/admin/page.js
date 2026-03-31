@@ -51,7 +51,6 @@ export default function AdminPage() {
     e.preventDefault()
     setLoading(true)
 
-    // Generate 5 random winning numbers between 1-45
     const winningNumbers = []
     while (winningNumbers.length < 5) {
       const n = Math.floor(Math.random() * 45) + 1
@@ -92,6 +91,11 @@ export default function AdminPage() {
     fetchAll()
   }
 
+  const handleVerification = async (winnerId, status) => {
+    await supabase.from('winners').update({ verification_status: status }).eq('id', winnerId)
+    fetchAll()
+  }
+
   const tabs = ['users', 'draws', 'charities', 'winners']
 
   return (
@@ -99,7 +103,10 @@ export default function AdminPage() {
 
       {/* Navbar */}
       <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-green-500">⛳ GolfCharity <span className="text-xs bg-red-600 px-2 py-0.5 rounded-full ml-2">ADMIN</span></h1>
+        <h1 className="text-xl font-bold text-green-500">
+          ⛳ GolfCharity{' '}
+          <span className="text-xs bg-red-600 px-2 py-0.5 rounded-full ml-2">ADMIN</span>
+        </h1>
         <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-400 hover:text-white transition">
           ← Back to Dashboard
         </button>
@@ -170,7 +177,6 @@ export default function AdminPage() {
         {/* DRAWS TAB */}
         {activeTab === 'draws' && (
           <div>
-            {/* Create Draw */}
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
               <h3 className="font-semibold mb-4">Create New Draw</h3>
               <form onSubmit={handleCreateDraw} className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -208,7 +214,6 @@ export default function AdminPage() {
               </form>
             </div>
 
-            {/* Draws List */}
             <div className="space-y-3">
               {draws.map(draw => (
                 <div key={draw.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
@@ -271,19 +276,67 @@ export default function AdminPage() {
               <p className="text-gray-500">No winners yet.</p>
             ) : (
               winners.map(w => (
-                <div key={w.id} className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{w.profiles?.full_name || w.profiles?.email}</p>
-                    <p className="text-gray-400 text-sm">{w.match_type} — ${w.prize_amount}</p>
+                <div key={w.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-medium">{w.profiles?.full_name || w.profiles?.email}</p>
+                      <p className="text-gray-400 text-sm">{w.match_type} — ${w.prize_amount}</p>
+                      <p className="text-gray-500 text-xs">
+                        {w.draws?.draw_date ? new Date(w.draws.draw_date).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        w.payment_status === 'paid' ? 'bg-green-900/40 text-green-400' : 'bg-yellow-900/40 text-yellow-400'
+                      }`}>
+                        💰 {w.payment_status || 'pending'}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        w.verification_status === 'approved' ? 'bg-green-900/40 text-green-400' :
+                        w.verification_status === 'rejected' ? 'bg-red-900/40 text-red-400' :
+                        'bg-yellow-900/40 text-yellow-400'
+                      }`}>
+                        {w.verification_status === 'approved' ? '✅' : w.verification_status === 'rejected' ? '❌' : '⏳'} {w.verification_status || 'pending'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      w.payment_status === 'paid' ? 'bg-green-900/40 text-green-400' : 'bg-yellow-900/40 text-yellow-400'
-                    }`}>{w.payment_status}</span>
-                    {w.payment_status !== 'paid' && (
-                      <button onClick={() => handleUpdatePayment(w.id)}
+
+                  {/* Proof */}
+                  {w.proof_url ? (
+                    <div className="mb-3">
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/authenticated/winner-proofs/${w.proof_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 text-sm hover:underline">
+                        📎 View Proof
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm mb-3">⚠️ No proof uploaded yet</p>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2 flex-wrap">
+                    {w.verification_status !== 'approved' && w.verification_status !== 'rejected' && w.proof_url && (
+                      <>
+                        <button
+                          onClick={() => handleVerification(w.id, 'approved')}
+                          className="bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg text-xs transition">
+                          ✅ Approve
+                        </button>
+                        <button
+                          onClick={() => handleVerification(w.id, 'rejected')}
+                          className="bg-red-900/40 hover:bg-red-900/60 text-red-400 px-3 py-1 rounded-lg text-xs transition">
+                          ❌ Reject
+                        </button>
+                      </>
+                    )}
+                    {w.verification_status === 'approved' && w.payment_status !== 'paid' && (
+                      <button
+                        onClick={() => handleUpdatePayment(w.id)}
                         className="bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg text-xs transition">
-                        Mark Paid
+                        💰 Mark Paid
                       </button>
                     )}
                   </div>
