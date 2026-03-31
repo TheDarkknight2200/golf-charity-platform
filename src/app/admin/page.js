@@ -94,6 +94,15 @@ export default function AdminPage() {
   fetchAll()
 }
 
+const handleViewProof = async (proofUrl) => {
+  const { data } = await supabase.storage
+    .from('winner-proofs')
+    .createSignedUrl(proofUrl, 60) // URL valid for 60 seconds
+  if (data?.signedUrl) {
+    window.open(data.signedUrl, '_blank')
+  }
+}
+
   const handleVerification = async (winnerId, status) => {
     await supabase.from('winners').update({ verification_status: status }).eq('id', winnerId)
     fetchAll()
@@ -305,19 +314,17 @@ export default function AdminPage() {
                   </div>
 
                   {/* Proof */}
-                  {w.proof_url ? (
-                    <div className="mb-3">
-                      <a
-                        href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/authenticated/winner-proofs/${w.proof_url}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 text-sm hover:underline">
-                        📎 View Proof
-                      </a>
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-sm mb-3">⚠️ No proof uploaded yet</p>
-                  )}
+                 {w.proof_url ? (
+  <div className="mb-3">
+    <button
+      onClick={() => handleViewProof(w.proof_url)}
+      className="text-blue-400 text-sm hover:underline">
+      📎 View Proof
+    </button>
+  </div>
+) : (
+  <p className="text-gray-500 text-sm mb-3">⚠️ No proof uploaded yet</p>
+)}
 
                   {/* Actions */}
                   <div className="flex gap-2 flex-wrap">
