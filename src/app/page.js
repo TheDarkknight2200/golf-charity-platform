@@ -69,7 +69,7 @@ export default function HomePage() {
             { step: '02', icon: '🎁', title: 'Enter Monthly Draws', desc: 'Every month, 5 winning numbers are drawn. Match 3, 4 or all 5 to win a share of the prize pool.' },
             { step: '03', icon: '❤️', title: 'Support a Charity', desc: 'Choose your charity at signup. A portion of every subscription goes directly to causes you care about.' },
           ].map(item => (
-            <div key={item.step} className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+            <div key={item.step} className={`card-hover bg-gray-900 border border-gray-800 rounded-2xl p-8 animate-fade-in-up delay-${(index + 2) * 100}`}>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-gray-600 text-sm font-mono">{item.step}</span>
                 <span className="text-3xl">{item.icon}</span>
