@@ -129,6 +129,15 @@ export default function Dashboard() {
     Donate Now
   </button>
 </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+  <h3 className="font-semibold mb-2">🏆 My Winnings</h3>
+  <p className="text-gray-400 text-sm mb-4">View your prizes and upload verification proof.</p>
+  <button
+    onClick={() => router.push('/dashboard/winners')}
+    className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+    View Winnings
+  </button>
+</div>
         </div>
 
       </div>
