@@ -29,39 +29,36 @@ export default function WinnersPage() {
   }, [])
 
   const handleUpload = async (winnerId, file) => {
-    if (!file) return
-    setUploading(winnerId)
+  if (!file) return
+  setUploading(winnerId)
 
-    const ext = file.name.split('.').pop()
-    const path = `${winnerId}.${ext}`
+  const ext = file.name.split('.').pop()
+  const path = `${winnerId}.${ext}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('winner-proofs')
-      .upload(path, file, { upsert: true })
+  const { error: uploadError } = await supabase.storage
+    .from('winner-proofs')
+    .upload(path, file, { upsert: true })
 
-    if (uploadError) {
-      alert('Upload failed: ' + uploadError.message)
-      setUploading(null)
-      return
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('winner-proofs')
-      .getPublicUrl(path)
-
-    await supabase
-      .from('winners')
-      .update({
-        proof_url: publicUrl,
-        verification_status: 'pending'
-      })
-      .eq('id', winnerId)
-
-    setWinners(prev => prev.map(w =>
-      w.id === winnerId ? { ...w, proof_url: publicUrl, verification_status: 'pending' } : w
-    ))
+  if (uploadError) {
+    alert('Upload failed: ' + uploadError.message)
     setUploading(null)
+    return
   }
+
+  
+  await supabase
+    .from('winners')
+    .update({
+      proof_url: path,
+      verification_status: 'pending'
+    })
+    .eq('id', winnerId)
+
+  setWinners(prev => prev.map(w =>
+    w.id === winnerId ? { ...w, proof_url: path, verification_status: 'pending' } : w
+  ))
+  setUploading(null)
+}
 
   const getStatusColor = (status) => {
     switch (status) {
