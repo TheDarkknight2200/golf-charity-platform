@@ -519,7 +519,7 @@ const handleViewProof = async (proofUrl) => {
                       </button>
                     )}
                   </div>
-                  {/* REPORTS TAB */}
+                 {/* REPORTS TAB */}
 {activeTab === 'reports' && (
   <div className="space-y-6">
     <h3 className="font-semibold text-lg">📊 Platform Analytics</h3>
@@ -529,11 +529,11 @@ const handleViewProof = async (proofUrl) => {
       <h4 className="text-green-400 font-semibold mb-4">👥 Users</h4>
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">{analytics.totalUsers}</p>
+          <p className="text-3xl font-bold text-white">{analytics.totalUsers || 0}</p>
           <p className="text-gray-400 text-sm mt-1">Total Users</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-green-400">{analytics.activeSubscribers}</p>
+          <p className="text-3xl font-bold text-green-400">{analytics.activeSubscribers || 0}</p>
           <p className="text-gray-400 text-sm mt-1">Active Subscribers</p>
         </div>
       </div>
@@ -544,15 +544,15 @@ const handleViewProof = async (proofUrl) => {
       <h4 className="text-green-400 font-semibold mb-4">💰 Finance</h4>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-green-400">${analytics.totalPrizePool.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-green-400">${(analytics.totalPrizePool || 0).toFixed(2)}</p>
           <p className="text-gray-400 text-sm mt-1">Total Prize Pool</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-blue-400">${analytics.totalCharityContributions.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-blue-400">${(analytics.totalCharityContributions || 0).toFixed(2)}</p>
           <p className="text-gray-400 text-sm mt-1">Charity Contributions</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-purple-400">${analytics.totalDonations.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-purple-400">${(analytics.totalDonations || 0).toFixed(2)}</p>
           <p className="text-gray-400 text-sm mt-1">Independent Donations</p>
         </div>
       </div>
@@ -563,15 +563,15 @@ const handleViewProof = async (proofUrl) => {
       <h4 className="text-green-400 font-semibold mb-4">🎁 Draws</h4>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-white">{analytics.totalDraws}</p>
+          <p className="text-3xl font-bold text-white">{analytics.totalDraws || 0}</p>
           <p className="text-gray-400 text-sm mt-1">Total Draws</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-green-400">{analytics.publishedDraws}</p>
+          <p className="text-3xl font-bold text-green-400">{analytics.publishedDraws || 0}</p>
           <p className="text-gray-400 text-sm mt-1">Published Draws</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-4 text-center">
-          <p className="text-3xl font-bold text-yellow-400">{analytics.pendingWinners}</p>
+          <p className="text-3xl font-bold text-yellow-400">{analytics.pendingWinners || 0}</p>
           <p className="text-gray-400 text-sm mt-1">Pending Payouts</p>
         </div>
       </div>
