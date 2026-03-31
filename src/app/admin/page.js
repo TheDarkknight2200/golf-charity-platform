@@ -113,10 +113,46 @@ const handleCreateDraw = async (e) => {
     setLoading(false)
   }
 
-  const handlePublishDraw = async (drawId) => {
-    await supabase.from('draws').update({ status: 'published' }).eq('id', drawId)
-    fetchAll()
+   const handlePublishDraw = async (drawId) => {
+  // Récupère le draw à publier
+  const { data: draw } = await supabase
+    .from('draws')
+    .select('*')
+    .eq('id', drawId)
+    .single()
+
+  // Vérifie s'il y a un gagnant 5-match
+  const { data: fiveMatchWinner } = await supabase
+    .from('winners')
+    .select('id')
+    .eq('draw_id', drawId)
+    .eq('match_type', '5-match')
+    .single()
+
+  // Publie le draw
+  await supabase.from('draws').update({ status: 'published' }).eq('id', drawId)
+
+  // Si pas de gagnant 5-match → rollover jackpot sur le prochain draw pending
+  if (!fiveMatchWinner) {
+    const { data: nextDraw } = await supabase
+      .from('draws')
+      .select('*')
+      .eq('status', 'pending')
+      .neq('id', drawId)
+      .order('draw_date', { ascending: true })
+      .limit(1)
+      .single()
+
+    if (nextDraw) {
+      await supabase
+        .from('draws')
+        .update({ jackpot_amount: (nextDraw.jackpot_amount || 0) + (draw.jackpot_amount || 0) })
+        .eq('id', nextDraw.id)
+    }
   }
+
+  fetchAll()
+}
 
   const handleDeleteDraw = async (drawId) => {
     await supabase.from('draws').delete().eq('id', drawId)
