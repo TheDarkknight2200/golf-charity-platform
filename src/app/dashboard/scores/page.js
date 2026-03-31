@@ -20,6 +20,16 @@ export default function ScoresPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/auth'); return }
       setUserId(session.user.id)
+      const { data: profile } = await supabase
+  .from('profiles')
+  .select('subscription_status')
+  .eq('id', session.user.id)
+  .single()
+
+if (profile?.subscription_status !== 'active') {
+  router.push('/dashboard/subscription')
+  return
+}
       fetchScores(session.user.id)
     }
     init()

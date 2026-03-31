@@ -19,6 +19,23 @@ export default function CharityPage() {
       if (!session) { router.push('/auth'); return }
       setUserId(session.user.id)
 
+        const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_status, charity_id, charity_percentage')
+        .eq('id', session.user.id)
+        .single()
+
+        if (profile?.subscription_status !== 'active') {
+            router.push('/dashboard/subscription')
+            return
+        }
+
+        if (profile?.charity_id) {
+            setCurrentCharity(profile.charity_id)
+            setSelectedCharity(profile.charity_id)
+            setPercentage(profile.charity_percentage || 10)
+        }
+
       // Fetch charities
       const { data: charitiesData } = await supabase
         .from('charities')
@@ -26,18 +43,7 @@ export default function CharityPage() {
         .order('featured', { ascending: false })
       setCharities(charitiesData || [])
 
-      // Fetch current profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('charity_id, charity_percentage')
-        .eq('id', session.user.id)
-        .single()
-
-      if (profile?.charity_id) {
-        setCurrentCharity(profile.charity_id)
-        setSelectedCharity(profile.charity_id)
-        setPercentage(profile.charity_percentage || 10)
-      }
+      
     }
     init()
   }, [])
