@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation'
 export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [participation, setParticipation] = useState({
+    drawsEntered: 0,
+    upcomingDraws: 0,
+    totalWinnings: 0,
+  })
   const router = useRouter()
 
   useEffect(() => {
@@ -13,12 +18,45 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/auth'); return }
       setUser(session.user)
+
       const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
         .single()
       setProfile(data)
+
+      // Participation summary
+      const { data: allDraws } = await supabase
+        .from('draws')
+        .select('*')
+
+      const { data: myScores } = await supabase
+        .from('scores')
+        .select('score')
+        .eq('user_id', session.user.id)
+
+      const { data: myWinnings } = await supabase
+        .from('winners')
+        .select('prize_amount')
+        .eq('user_id', session.user.id)
+
+      const publishedDraws = allDraws?.filter(d => d.status === 'published') || []
+      const upcomingDraws = allDraws?.filter(d => d.status === 'pending') || []
+      const userScores = myScores?.map(s => s.score) || []
+
+      // Un draw est "entered" si l'utilisateur avait des scores qui matchent
+      const drawsEntered = publishedDraws.filter(draw =>
+        draw.winning_numbers?.some(n => userScores.includes(n))
+      ).length
+
+      const totalWinnings = myWinnings?.reduce((sum, w) => sum + (w.prize_amount || 0), 0) || 0
+
+      setParticipation({
+        drawsEntered,
+        upcomingDraws: upcomingDraws.length,
+        totalWinnings,
+      })
     }
     getUser()
   }, [])
@@ -91,6 +129,25 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Participation Summary */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
+          <h3 className="font-semibold mb-4">📊 Participation Summary</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-green-500">{participation.drawsEntered}</p>
+              <p className="text-gray-400 text-sm mt-1">Draws Entered</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-blue-400">{participation.upcomingDraws}</p>
+              <p className="text-gray-400 text-sm mt-1">Upcoming Draws</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-yellow-400">${participation.totalWinnings}</p>
+              <p className="text-gray-400 text-sm mt-1">Total Winnings</p>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -121,23 +178,23 @@ export default function Dashboard() {
             </button>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-  <h3 className="font-semibold mb-2">❤️ Make a Donation</h3>
-  <p className="text-gray-400 text-sm mb-4">Donate directly to a charity, independent of your subscription.</p>
-  <button
-    onClick={() => router.push('/dashboard/donate')}
-    className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-    Donate Now
-  </button>
-</div>
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-  <h3 className="font-semibold mb-2">🏆 My Winnings</h3>
-  <p className="text-gray-400 text-sm mb-4">View your prizes and upload verification proof.</p>
-  <button
-    onClick={() => router.push('/dashboard/winners')}
-    className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
-    View Winnings
-  </button>
-</div>
+            <h3 className="font-semibold mb-2">❤️ Make a Donation</h3>
+            <p className="text-gray-400 text-sm mb-4">Donate directly to a charity, independent of your subscription.</p>
+            <button
+              onClick={() => router.push('/dashboard/donate')}
+              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+              Donate Now
+            </button>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-2">🏆 My Winnings</h3>
+            <p className="text-gray-400 text-sm mb-4">View your prizes and upload verification proof.</p>
+            <button
+              onClick={() => router.push('/dashboard/winners')}
+              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+              View Winnings
+            </button>
+          </div>
         </div>
 
       </div>
