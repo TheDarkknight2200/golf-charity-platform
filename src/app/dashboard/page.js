@@ -84,28 +84,32 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
-          <div className="animate-fade-in-up delay-100 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm">Subscription</p>
-            <p className={`text-2xl font-bold mt-1 ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
-              {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
-            </p>
-            {profile?.subscription_status !== 'active' && (
-              <button
-                onClick={() => router.push('/dashboard/subscription')}
-                className="btn-press mt-3 text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded-lg transition">
-                Subscribe now
-              </button>
-            )}
-          </div>
-          <div className="animate-fade-in-up delay-200 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm">My Charity</p>
-            <p className="text-2xl font-bold mt-1">{profile?.charity_id ? 'Selected' : 'Not selected'}</p>
-          </div>
-          <div className="animate-fade-in-up delay-300 card-hover bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm">Charity Contribution</p>
-            <p className="text-2xl font-bold mt-1 text-green-500">{profile?.charity_percentage || 10}%</p>
-          </div>
-        </div>
+  <div className="animate-fade-in-up delay-100 card-hover bg-gray-900 border border-gray-800 rounded-xl p-3 md:p-6">
+    <p className="text-gray-400 text-xs md:text-sm">Subscription</p>
+    <p className={`text-sm md:text-2xl font-bold mt-1 truncate ${profile?.subscription_status === 'active' ? 'text-green-500' : 'text-red-400'}`}>
+      {profile?.subscription_status === 'active' ? 'Active' : 'Inactive'}
+    </p>
+    {profile?.subscription_status !== 'active' && (
+      <button
+        onClick={() => router.push('/dashboard/subscription')}
+        className="btn-press mt-2 text-xs bg-green-600 hover:bg-green-500 px-2 py-1 rounded-lg transition">
+        Subscribe
+      </button>
+    )}
+  </div>
+  <div className="animate-fade-in-up delay-200 card-hover bg-gray-900 border border-gray-800 rounded-xl p-3 md:p-6">
+    <p className="text-gray-400 text-xs md:text-sm">My Charity</p>
+    <p className="text-sm md:text-2xl font-bold mt-1 truncate">
+      {profile?.charity_id ? 'Selected' : 'None'}
+    </p>
+  </div>
+  <div className="animate-fade-in-up delay-300 card-hover bg-gray-900 border border-gray-800 rounded-xl p-3 md:p-6">
+    <p className="text-gray-400 text-xs md:text-sm">Contribution</p>
+    <p className="text-sm md:text-2xl font-bold mt-1 text-green-500 truncate">
+      {profile?.charity_percentage || 10}%
+    </p>
+  </div>
+</div>
 
         {/* Participation Summary */}
         <div className="animate-fade-in-up delay-400 bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
